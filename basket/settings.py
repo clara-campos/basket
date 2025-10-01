@@ -480,3 +480,5 @@ if OIDC_ENABLE:
         "/readiness/",
         "/watchman/",
     ]
+
+BRAZE_UNSUBSCRIBE_ENABLE = config("BRAZE_UNSUBSCRIBE_ENABLE", parser=bool, default="false")
