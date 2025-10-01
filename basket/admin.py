@@ -154,6 +154,13 @@ class BasketAdminSite(admin.AdminSite):
 
                 # Process the emails.
                 for email in emails:
+                    if settings.BRAZE_UNSUBSCRIBE_ENABLE:
+                        try:
+                            braze.dsar_unsubscribe(email)
+                            output.append(f"BRAZE UNSUBSCRIBED: {email}")
+                        except Exception:
+                            output.append(f"BRAZE ERROR: Could not unsubscribe {email}")
+
                     contact = ctms.get(email=email)
                     if contact:
                         email_id = contact["email_id"]
@@ -161,11 +168,11 @@ class BasketAdminSite(admin.AdminSite):
                             ctms.interface.patch_by_email_id(email_id, update_data)
                         except CTMSNotFoundByEmailIDError:
                             # should never reach here, but best to catch it anyway
-                            output.append(f"{email} not found in CTMS")
+                            output.append(f"CTMS ERROR: {email} not found in CTMS")
                         else:
-                            output.append(f"UNSUBSCRIBED {email} (ctms id: {email_id}).")
+                            output.append(f"CTMS UNSUBSCRIBED: {email} (ctms id: {email_id}).")
                     else:
-                        output.append(f"{email} not found in CTMS")
+                        output.append(f"CTMS ERROR: {email} not found in CTMS")
 
                 output = "\n".join(output)
 
@@ -173,7 +180,7 @@ class BasketAdminSite(admin.AdminSite):
                 form = EmailListForm()
 
         context = {
-            "title": "DSAR: Unsubscribe CTMS Users by Email Address",
+            "title": f"DSAR: Unsubscribe {'Braze and ' if settings.BRAZE_UNSUBSCRIBE_ENABLE else ''}CTMS Users by Email Address",
             "dsar_form": form,
             "dsar_output": output,
         }

@@ -44,6 +44,7 @@ class BrazeEndpoint(Enum):
     USERS_TRACK = "/users/track"
     USERS_DELETE = "/users/delete"
     SUBSCRIPTION_STATUS_SET = "/v2/subscription/status/set"
+    EMAIL_STATUS = "/email/status"
 
 
 class BrazeClient:
@@ -232,6 +233,16 @@ class BrazeClient:
         }
 
         return self._request(BrazeEndpoint.SUBSCRIPTION_STATUS_SET, data)
+
+    def dsar_unsubscribe(self, email):
+        """
+        Set subscription status for the specified newsletters
+        https://www.braze.com/docs/api/endpoints/email/post_email_subscription_status
+        """
+
+        data = {"email": email, "subscription_state": "unsubscribed"}
+
+        return self._request(BrazeEndpoint.EMAIL_STATUS, data)
 
 
 braze = BrazeClient(settings.BRAZE_BASE_API_URL, settings.BRAZE_API_KEY)
