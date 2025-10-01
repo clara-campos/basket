@@ -135,6 +135,7 @@ class BasketAdminSite(admin.AdminSite):
     def dsar_unsub_view(self, request):
         form = EmailListForm()
         output = None
+        is_braze_enabled = settings.BRAZE_UNSUBSCRIBE_ENABLE
 
         if request.method == "POST":
             form = EmailListForm(request.POST)
@@ -154,7 +155,7 @@ class BasketAdminSite(admin.AdminSite):
 
                 # Process the emails.
                 for email in emails:
-                    if settings.BRAZE_UNSUBSCRIBE_ENABLE:
+                    if is_braze_enabled:
                         try:
                             braze.dsar_unsubscribe(email)
                             output.append(f"BRAZE UNSUBSCRIBED: {email}")
@@ -164,15 +165,16 @@ class BasketAdminSite(admin.AdminSite):
                     contact = ctms.get(email=email)
                     if contact:
                         email_id = contact["email_id"]
+                        not_found_error_message = f"{'CTMS ERROR: ' if is_braze_enabled else ''}{email} not found in CTMS"
                         try:
                             ctms.interface.patch_by_email_id(email_id, update_data)
                         except CTMSNotFoundByEmailIDError:
                             # should never reach here, but best to catch it anyway
-                            output.append(f"CTMS ERROR: {email} not found in CTMS")
+                            output.append(not_found_error_message)
                         else:
-                            output.append(f"CTMS UNSUBSCRIBED: {email} (ctms id: {email_id}).")
+                            output.append(f"{'CTMS UNSUBSCRIBED:' if is_braze_enabled else 'UNSUBSCRIBED'} {email} (ctms id: {email_id}).")
                     else:
-                        output.append(f"CTMS ERROR: {email} not found in CTMS")
+                        output.append(not_found_error_message)
 
                 output = "\n".join(output)
 
@@ -180,7 +182,7 @@ class BasketAdminSite(admin.AdminSite):
                 form = EmailListForm()
 
         context = {
-            "title": f"DSAR: Unsubscribe {'Braze and ' if settings.BRAZE_UNSUBSCRIBE_ENABLE else ''}CTMS Users by Email Address",
+            "title": f"DSAR: Unsubscribe {'Braze and ' if is_braze_enabled else ''}CTMS Users by Email Address",
             "dsar_form": form,
             "dsar_output": output,
         }
