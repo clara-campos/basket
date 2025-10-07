@@ -20,6 +20,7 @@ from basket.news.models import (
 )
 from basket.news.newsletters import newsletter_languages, newsletter_obj
 from basket.news.utils import (
+    SET,
     SUBSCRIBE,
     UNSUBSCRIBE,
     generate_token,
@@ -204,6 +205,7 @@ def upsert_user(api_call_type, data):
     )
 
 
+# here
 def upsert_contact(api_call_type, data, user_data):
     """
     Update or insert (upsert) a contact record
@@ -255,6 +257,7 @@ def upsert_contact(api_call_type, data, user_data):
         to_subscribe_slugs = [nl for nl, sub in update_data["newsletters"].items() if sub]
         check_optin = not (forced_optin or (user_data and user_data.get("optin")))
         check_mofo = not (user_data and user_data.get("mofo_relevant"))
+        # to_subscribe_braze_ids = list(Newsletter.objects.filter(slug__in=to_subscribe_slugs).values_list("vendor_id", flat=True))
 
         if to_subscribe_slugs and (check_optin or check_mofo):
             to_subscribe = Newsletter.objects.filter(slug__in=to_subscribe_slugs)
@@ -301,6 +304,12 @@ def upsert_contact(api_call_type, data, user_data):
     # clear the optout flag
     if api_call_type != UNSUBSCRIBE and user_data.get("optout"):
         update_data["optout"] = False
+
+    if settings.BRAZE_POST_USER_ENABLE and api_call_type == SET:
+        if settings.MAINTENANCE_MODE:
+            braze_update_user_details.delay(update_data, forced_optin)
+        else:
+            braze_update_user_details(update_data, forced_optin)
 
     # update record
     if user_data and user_data.get("token"):
@@ -480,3 +489,31 @@ def get_fxa_user_data(fxa_id, email):
         user_data = get_user_data(email=email, extra_fields=["id", "email_id"])
 
     return user_data
+
+
+@rq_task
+def braze_update_user_details(update_data, forced_optin):
+    """
+    Updates user details in Braze for existing users
+    """
+    new_attributes = {}
+
+    if forced_optin == "Y":
+        new_attributes["email_subscribe"] = True
+    if update_data.get("country"):
+        new_attributes["country"] = update_data["country"]
+    if update_data.get("lang"):
+        new_attributes["language"] = update_data["lang"]
+
+    if update_data["newsletters"]:
+        newsletters = Newsletter.objects.filter(slug__in=update_data["newsletters"]).values("vendor_id", "slug")
+        new_attributes["subscription_groups"] = [
+            {
+                "subscription_group_id": newsletter["vendor_id"],
+                "subscription_state": "subscribed" if newsletter["slug"] in update_data["newsletters"] else "unsubscribed",
+            }
+            for newsletter in newsletters
+        ]
+
+    if new_attributes:
+        braze.update_user_attributes(update_data["email"], new_attributes)
