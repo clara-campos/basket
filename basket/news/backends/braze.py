@@ -220,7 +220,7 @@ class BrazeClient:
 
     def update_user_attributes(self, email, attributes):
         """
-        Track a user in Braze.
+        Updates attributes for an existing user in Braze.
         https://www.braze.com/docs/api/endpoints/user_data/post_user_track/
 
         """
@@ -234,5 +234,6 @@ class BrazeClient:
             ],
         }
         return self._request(BrazeEndpoint.USERS_TRACK, data)
+
 
 braze = BrazeClient(settings.BRAZE_BASE_API_URL, settings.BRAZE_API_KEY)

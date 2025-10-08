@@ -205,7 +205,6 @@ def upsert_user(api_call_type, data):
     )
 
 
-# here
 def upsert_contact(api_call_type, data, user_data):
     """
     Update or insert (upsert) a contact record
@@ -306,9 +305,9 @@ def upsert_contact(api_call_type, data, user_data):
 
     if settings.BRAZE_POST_USER_ENABLE and api_call_type == SET:
         if settings.MAINTENANCE_MODE:
-            braze_update_user_details.delay(update_data, forced_optin)
+            braze_update_user_attributes.delay(update_data, forced_optin)
         else:
-            braze_update_user_details(update_data, forced_optin)
+            braze_update_user_attributes(update_data, forced_optin)
 
     # update record
     if user_data and user_data.get("token"):
@@ -491,9 +490,9 @@ def get_fxa_user_data(fxa_id, email):
 
 
 @rq_task
-def braze_update_user_details(update_data, forced_optin):
+def braze_update_user_attributes(update_data, forced_optin):
     """
-    Updates user details in Braze for existing users
+    Updates user attributes in Braze for existing users
     """
     new_attributes = {}
 
