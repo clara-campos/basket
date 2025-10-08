@@ -179,6 +179,15 @@ def test_braze_delete_users(braze_client):
         assert m.last_request.json() == expected
 
 
+def test_braze_dsar_unsubscribe(braze_client):
+    email = "test@test.com"
+    expected = {"email": email, "subscription_state": "unsubscribed"}
+    with requests_mock.mock() as m:
+        m.register_uri("POST", "http://test.com/email/status", json={})
+        braze_client.dsar_unsubscribe(email)
+        assert m.last_request.json() == expected
+
+
 def test_braze_exception_400(braze_client):
     with requests_mock.mock() as m:
         m.register_uri("POST", "http://test.com/users/track", status_code=400, json={})
