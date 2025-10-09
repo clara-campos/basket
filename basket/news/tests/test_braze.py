@@ -179,6 +179,26 @@ def test_braze_delete_users(braze_client):
         assert m.last_request.json() == expected
 
 
+def test_update_user_attributes(braze_client):
+    email = "test@test.com"
+    attributes = {
+        "country": "CA",
+    }
+    expected = {
+        "attributes": [
+            {
+                "country": "CA",
+                "email": "test@test.com",
+                "_update_existing_only": True,
+            }
+        ]
+    }
+    with requests_mock.mock() as m:
+        m.register_uri("POST", "http://test.com/users/track", json={})
+        braze_client.update_user_attributes(email, attributes)
+        assert m.last_request.json() == expected
+
+
 def test_braze_exception_400(braze_client):
     with requests_mock.mock() as m:
         m.register_uri("POST", "http://test.com/users/track", status_code=400, json={})
