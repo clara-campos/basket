@@ -328,6 +328,9 @@ def upsert_contact(
         if not newsletters:
             # Only transactional messages found, nothing else to do.
             return None, None
+    elif use_braze_backend and update_data.get("optout", "N") == "Y":
+        # Unsubscribe from all current Braze newsletters if user is opting out
+        newsletters = []
 
     # Set the newsletter flags in the record by comparing to their
     # current subscriptions.
