@@ -663,7 +663,6 @@ def test_braze_add(mock_newsletters, braze_client):
     new_user = {
         "email": "test@example.com",
         "email_id": "123",
-        "token": "123",
         "newsletters": {"foo-news": True},
         "country": "US",
     }
@@ -686,7 +685,7 @@ def test_braze_add(mock_newsletters, braze_client):
 def test_braze_add_with_fxa_id(add_fxa_id, mock_newsletters, braze_client):
     braze_instance = Braze(braze_client)
     fxa_id = "fxa123"
-    new_user = {"email": "test@example.com", "email_id": "123", "token": "123", "newsletters": {"foo-news": True}, "country": "US", "fxa_id": fxa_id}
+    new_user = {"email": "test@example.com", "email_id": "123", "newsletters": {"foo-news": True}, "country": "US", "fxa_id": fxa_id}
 
     with requests_mock.mock() as m:
         m.register_uri("POST", "http://test.com/users/track", json={})
