@@ -414,11 +414,12 @@ class Braze:
         # completed we won't be able to look up the user. We add a temporary shim here which
         # will fetch the email from CTMS. This shim can be disabled/removed after the migration
         # is complete.
-        elif not email and settings.BRAZE_CTMS_SHIM_ENABLE:
+        elif not email and (fxa_id or token) and settings.BRAZE_CTMS_SHIM_ENABLE:
             try:
                 ctms_response = ctms.get(token=token, fxa_id=fxa_id)
                 if ctms_response:
                     email = ctms_response.get("email")
+                    return self.get(email=email)
             except Exception:
                 log.warn("Unable to fetch email from CTMS in braze.get shim")
 
