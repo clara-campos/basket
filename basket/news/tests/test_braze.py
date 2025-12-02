@@ -305,7 +305,7 @@ mock_basket_user_data = {
     "last_modified_date": "2022-02-01",
     "optin": True,
     "optout": False,
-    "token": "abc",
+    "token": "123",
     "fxa_service": "test",
     "fxa_lang": "en",
     "fxa_primary_email": "test2@example.com",
@@ -333,7 +333,6 @@ mock_braze_user_data = {
                 "email_lang": "en",
                 "created_at": "2022-01-01",
                 "updated_at": "2022-02-01",
-                "basket_token": "abc",
                 "fxa_first_service": "test",
                 "fxa_lang": "en",
                 "fxa_primary_email": "test2@example.com",
@@ -400,7 +399,6 @@ def test_to_vendor_with_user_data_and_no_updates(mock_newsletter_languages, mock
                         "created_at": {
                             "$time": "2022-01-01",
                         },
-                        "basket_token": "abc",
                         "fxa_first_service": "test",
                         "fxa_lang": "en",
                         "fxa_primary_email": "test2@example.com",
@@ -450,7 +448,6 @@ def test_to_vendor_with_updates_and_no_user_data(mock_newsletter_languages, mock
                         "created_at": {
                             "$time": dt.isoformat(),
                         },
-                        "basket_token": "abc",
                         "fxa_first_service": None,
                         "fxa_lang": None,
                         "fxa_primary_email": None,
@@ -489,7 +486,7 @@ def test_to_vendor_with_updates_and_no_user_data_in_braze_only_write(mock_newsle
             {
                 "_update_existing_only": False,
                 "email": "test@example.com",
-                "external_id": "abc",
+                "external_id": "123",
                 "language": "en",
                 "email_subscribe": "subscribed",
                 "subscription_groups": [
@@ -502,7 +499,6 @@ def test_to_vendor_with_updates_and_no_user_data_in_braze_only_write(mock_newsle
                         "created_at": {
                             "$time": dt.isoformat(),
                         },
-                        "basket_token": "abc",
                         "fxa_first_service": None,
                         "fxa_lang": None,
                         "fxa_primary_email": None,
@@ -573,7 +569,6 @@ def test_to_vendor_with_both_user_data_and_updates(mock_newsletter_languages, mo
                         "created_at": {
                             "$time": "2022-01-01",
                         },
-                        "basket_token": "abc",
                         "fxa_first_service": "test",
                         "fxa_lang": "en",
                         "fxa_primary_email": "test2@example.com",
@@ -629,7 +624,6 @@ def test_to_vendor_with_events(mock_newsletters, braze_client):
                         "created_at": {
                             "$time": "2022-01-01",
                         },
-                        "basket_token": "abc",
                         "fxa_first_service": "test",
                         "fxa_lang": "en",
                         "fxa_primary_email": "test2@example.com",
@@ -720,7 +714,7 @@ def test_braze_add(mock_newsletters, braze_client):
     new_user = {
         "email": "test@example.com",
         "email_id": "123",
-        "token": "abc",
+        "token": "123",
         "newsletters": {"foo-news": True},
         "country": "US",
     }
@@ -743,7 +737,7 @@ def test_braze_add(mock_newsletters, braze_client):
 def test_braze_add_with_fxa_id(add_fxa_id, mock_newsletters, braze_client):
     braze_instance = Braze(braze_client)
     fxa_id = "fxa123"
-    new_user = {"email": "test@example.com", "email_id": "123", "token": "abc", "newsletters": {"foo-news": True}, "country": "US", "fxa_id": fxa_id}
+    new_user = {"email": "test@example.com", "email_id": "123", "token": "123", "newsletters": {"foo-news": True}, "country": "US", "fxa_id": fxa_id}
 
     with requests_mock.mock() as m:
         m.register_uri("POST", "http://test.com/users/track", json={})
