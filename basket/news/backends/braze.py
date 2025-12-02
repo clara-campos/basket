@@ -418,8 +418,9 @@ class Braze:
             try:
                 ctms_response = ctms.get(token=token, fxa_id=fxa_id)
                 if ctms_response:
-                    email = ctms_response.get("email")
-                    return self.get(email=email)
+                    ctms_email = ctms_response.get("email")
+                    if ctms_email:
+                        return self.get(email=ctms_email)
             except Exception:
                 log.warn("Unable to fetch email from CTMS in braze.get shim")
 
