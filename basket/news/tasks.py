@@ -76,14 +76,14 @@ def fxa_email_changed(
                 ctms.update(user_data, {"fxa_id": fxa_id, "fxa_primary_email": email})
         else:
             # No matching record for Email or FxA ID. Create one.
-            email_id = pre_generated_email_id or generate_token()
             data = {
                 "email": email,
-                "token": email_id,
-                "email_id": email_id,
+                "token": pre_generated_email_id or generate_token(),
                 "fxa_id": fxa_id,
                 "fxa_primary_email": email,
             }
+            if pre_generated_email_id:
+                data["email_id"] = pre_generated_email_id
 
             backend_data = data.copy()
             contact = None
@@ -362,9 +362,10 @@ def upsert_contact(
             return None, False
 
         # no user found. create new one.
-        email_id = pre_generated_email_id or generate_token()
-        token = update_data["token"] = email_id
-        update_data["email_id"] = email_id
+        token = update_data["token"] = pre_generated_email_id or generate_token()
+
+        if pre_generated_email_id:
+            update_data["email_id"] = pre_generated_email_id
 
         if settings.MAINTENANCE_MODE:
             if use_braze_backend:
